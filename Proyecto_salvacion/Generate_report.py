@@ -12,7 +12,7 @@ def _format_cell_value(val):
     """Formatea valores: fechas -> dd/mm/YYYY, NaN/NaT -> '', otros -> str."""
     if val is None:
         return ""
-    # datetime check
+
     if isinstance(val, (datetime,)):
         return val.strftime("%d/%m/%Y")
     # pandas Timestamp (avoid importing pandas here)
@@ -74,39 +74,23 @@ def _df_to_table_story(df, styles):
 def crear_pdf_reporte(
     df_seleccion,
     secciones,
-    responsables=None,
-    nombre_pdf="Reporte_ACK.pdf",
-    texto_inicial=None,
-    textos_por_seccion=None,
+    time, 
+    nombre_pdf=f"Reporte_ACK.pdf",
+    texto_inicial= (
+            "Este reporte presenta el análisis correspondiente a los diferentes indicadores GAP "
+            "cada sección permite identificar los procesos pendientes que impiden la facturación."
+            
+        )
 ):
-    """Crea un PDF con las siguientes características:
-    - Título centrado
-    - Línea divisoria
-    - Texto inicial editable
-    - Para cada sección: subtítulo, responsable (desde 'responsables' dict), texto editable y tablas
-    - Formato de fecha dd/mm/YYYY
-    - Semáforo en la columna 'Dias_Integracion' (rojo/naranja/amarillo)
-
-    Parámetros:
-        df_seleccion: DataFrame base (no se imprime pero puede usarse si se necesita)
-        secciones: lista de tuplas (titulo, dataframe | tuple_of_dataframes)
-        responsables: dict {titulo: "Nombre responsable"}
-        nombre_pdf: nombre archivo salida
-        texto_inicial: string opcional para bloque inicial
-        textos_por_seccion: dict {titulo: texto}
+    """Crea un PDF con las siguientes características
     """
 
     # Valores por defecto
-    if responsables is None:
-        responsables = {}
-    if textos_por_seccion is None:
-        textos_por_seccion = {}
-    if texto_inicial is None:
-        texto_inicial = (
-            "Este reporte presenta el análisis correspondiente a los diferentes indicadores GAP "
-            "apoyados en la información disponible. Cada sección contiene un resumen detallado "
-            "de los estados que cumplen condiciones de clasificación."
-        )
+
+    
+
+
+
 
     # Documento
     doc = SimpleDocTemplate(
@@ -125,10 +109,11 @@ def crear_pdf_reporte(
     style_title = ParagraphStyle("title", parent=styles["Title"], alignment=TA_CENTER, fontSize=20)
     style_sub = ParagraphStyle("subtitle", parent=styles["Heading2"], fontSize=14, alignment=TA_LEFT)
     style_text = ParagraphStyle("text", parent=styles["Normal"], alignment=TA_JUSTIFY, fontSize=10, leading=14)
-    style_responsable = ParagraphStyle("responsable", parent=styles["Normal"], alignment=TA_LEFT, fontSize=9, italic=True)
+    style_dif = ParagraphStyle("subtitle", parent=styles["Heading2"], fontSize=10, alignment=TA_LEFT)
 
     # Título
     story.append(Paragraph("Reporte de Análisis GAP", style_title))
+    story.append(Paragraph(f"Fecha de actualización: {time}", style_dif))
     story.append(Spacer(1, 8))
     story.append(HRFlowable(width="100%", thickness=1))
     story.append(Spacer(1, 12))
@@ -143,16 +128,16 @@ def crear_pdf_reporte(
         story.append(Paragraph(titulo, style_sub))
         story.append(Spacer(1, 4))
 
-        # Responsable si existe
-        responsable = responsables.get(titulo)
-        if responsable:
-            story.append(Paragraph(f"Responsable: <b>{responsable}</b>", style_responsable))
-            story.append(Spacer(1, 6))
+
 
         # Texto por sección (editable)
-        texto_cat = textos_por_seccion.get(titulo, (f"Resultados obtenidos para la categoría <b>{titulo}</b>. "
-                                                     "Esta sección contiene los registros clasificados según los criterios establecidos."))
+        texto_cat = (f"Resultados obtenidos para la categoría <b>{titulo}</b>. "
+                    "Esta sección contiene los registros clasificados según los criterios establecidos.")
+                    
+        texto_cat_r  =  (f"Responsable - {persona_responsable(titulo= titulo)}")
+        
         story.append(Paragraph(texto_cat, style_text))
+        story.append(Paragraph(texto_cat_r, style_dif))
         story.append(Spacer(1, 8))
 
         # Manejar si la sección trae múltiples dataframes (tuple) o uno solo
@@ -179,3 +164,22 @@ def crear_pdf_reporte(
     # Construir PDF
     doc.build(story)
     print(f"PDF generado: {nombre_pdf}")
+
+def persona_responsable(titulo):
+    match titulo: 
+        case "GAP DOC": 
+            return "Liliana Acosta"
+        case "GAP INV":
+            return "Aldemar Valenzuela"
+        case "GAP HW":
+            return "Aldemar Valenzuela"
+        case "GAP SiteOwner":
+            return "Tommy Cantillo"
+        case "GAP ONAIR":
+            return "Tommy Cantillo"
+        case _: 
+            return "No hay sección asignada aun"
+    
+    
+
+
