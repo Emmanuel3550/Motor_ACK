@@ -162,7 +162,7 @@ def crear_pdf_reporte(
                 story.append(Spacer(1, 14))
 
     # Construir PDF
-    doc.build(story)
+    final_doc = doc.build(story)
     print(f"PDF generado: {nombre_pdf}")
 
 def persona_responsable(titulo):
@@ -172,7 +172,7 @@ def persona_responsable(titulo):
         case "GAP INV":
             return "Aldemar Valenzuela"
         case "GAP HW":
-            return "Aldemar Valenzuela"
+            return "Aldemar Valenzuela(Picking) - Liliana Acosta"
         case "GAP SiteOwner":
             return "Tommy Cantillo"
         case "GAP ONAIR":

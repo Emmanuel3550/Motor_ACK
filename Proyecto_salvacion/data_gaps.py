@@ -8,6 +8,7 @@ def cargar_archivo(ruta_excel = "C:/Users/lenis/Downloads/1_diciembre.xlsx"):
         "GAP_LOG_INV","GAP_DOC","GAP_HW_Cierre","GAP_SiteOwner","GAP_OnAir"
     ]]
     df = df.rename(columns= {"Dias_Integracion" : "Dias desde la integracion"})
+    
 
     return df
 
