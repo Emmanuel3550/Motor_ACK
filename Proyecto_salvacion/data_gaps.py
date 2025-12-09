@@ -1,7 +1,7 @@
 
 import pandas as pd
 
-def cargar_archivo(ruta_excel = "C:/Users/lenis/Downloads/1_diciembre.xlsx"):
+def cargar_archivo(ruta_excel):
     df = pd.read_excel(ruta_excel, sheet_name="ACK_Report_Sabana")
     df = df.loc[:, [
         "main_smp","siteName","mos", "integracion", "Dias_Integracion",
