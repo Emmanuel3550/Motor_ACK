@@ -9,7 +9,7 @@ import os
 
 
 class EmailService: 
-    def __init__(self, receiver_email, subject = "Tabla de procesos pendientes" , body: Optional[List] = None, attachment = None, SENDER_EMAIL = "@gmail.com ", SENDER_PASSWORD = "1234"):
+    def __init__(self, receiver_email, subject = "Tabla de procesos pendientes" , body: Optional[List] = None, attachment = None, SENDER_EMAIL = "email@gmail.com", SENDER_PASSWORD = "contraseña de google(generada especificamente)"):
         """Inicializa la clase con los datos del correo electrónico."""
         self.SENDER_EMAIL= SENDER_EMAIL  # Correo del remitente
         self.SENDER_PASSWORD = SENDER_PASSWORD  # Contraseña del remitente (contraseña de aplicación)
@@ -21,15 +21,45 @@ class EmailService:
 
     
 
-    def individual_mail(self):
+    def individual_mail(self): 
         info_envio = self.body  
-        info_lista = []
-        for dataframe in info_envio:
-            h= dataframe.to_html()
-            info_lista.append(h)
-        
-        body_envio = f"""Reporte de procesos pendientes{[x for x in info_lista]} en la reunion se podra discutir las razones que impiden 
-                        la ejecucion del proceso adiconalmente el plan para poder llevarlo acabo"""
+        tablas_html = ""
+
+        for df in info_envio:
+
+            # --- LIMPIAR SALTOS DE LÍNEA ---
+            df_limpio = df.copy().astype(str)
+            df_limpio = df_limpio.applymap(lambda x: x.replace("\n", "").strip())
+
+            # Convertir tabla limpia a HTML
+            h = df_limpio.to_html(index=False, border=1)
+            tablas_html += h + "<br><br>"
+
+            # Cuerpo HTML bonito
+        body_envio = f"""
+            <html>
+        <body style="font-family: Arial; font-size: 14px;">
+
+            <h2 style="color:#2F5597;">Reporte de procesos pendientes</h2>
+
+            <p>
+                Estimado equipo,<br><br>
+                Se presenta el reporte actualizado de los procesos pendientes:
+            </p>
+
+            {tablas_html}
+
+            <p>
+                En la reunión se revisarán las razones que impiden la ejecución del proceso
+                y se discutirá un plan de trabajo.
+            </p>
+
+            <p>Saludos,<br>Automatización</p>
+
+        </body>
+        </html>
+        """
+
         mensaje = MIMEMultipart()
         mensaje["From"] = self.SENDER_EMAIL
         mensaje["To"] = self.receiver_email
@@ -39,12 +69,13 @@ class EmailService:
         try:
             servidor = smtplib.SMTP("smtp.gmail.com", 587)
             servidor.starttls()
-            servidor.login(self.SENDER_EMAIL,self.SENDER_PASSWORD)
+            servidor.login(self.SENDER_EMAIL, self.SENDER_PASSWORD)
             servidor.send_message(mensaje)
             servidor.quit()
-            print("Correo enviado sin adjunto ✔️")
+            print("Correo enviado ✔️")
         except Exception as e:
             print("Error:", e)
+
 
 
     def send_report(self):
@@ -54,7 +85,7 @@ class EmailService:
         msg["From"] = self.SENDER_EMAIL  # Define el remitente
         msg["To"] = self.receiver_email  # Define el destinatario
         msg["Subject"] = "Reporte de pendientes"  # Establece el asunto del mensaje
-        msg.attach(MIMEText(self.body, "plain"))  # Agrega el cuerpo del mensaje en texto plano
+
 
         # Adjuntar el archivo PDF al correo
         with open(self.attachment, "rb") as file:  # Abre el archivo en modo binario

@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     charge ={"Tommy Cantillo": [ow_0600, ow_0710, air_df], "Aldemar Valenzuela":[log_0100,log_0010, hwc_0150], 
              "Laura Acosta": [doc_df, hwc_0200, hwc_0250]}
-    correo = {"Tommy Cantillo": "lenisdacosta@gmail.com", "Aldemar Valenzuela": "lenissario18@gmail.com",
-              "Laura Acosta": "lenisemmanueldavid@gmail.com"}
+    correo = {"Tommy Cantillo": "Y", "Aldemar Valenzuela": "Z",  # Cambia las letras X,Y,Z por el email correcto
+              "Laura Acosta": "X"}
     for nombre, tareas in charge.items():
         email = correo.get(nombre)
 
@@ -60,5 +60,9 @@ if __name__ == "__main__":
 
 
 
-    # Generar PDF
-    crear_pdf_reporte(df, secciones, time, nombre_pdf=f"Reporte_Final {time}.pdf")
+    nombre = f"Reporte_Final {time}.pdf"
+    
+    crear_pdf_reporte(df, secciones, time, nombre_pdf=nombre )
+    ruta_archivo = f"C:/Users/lenis/OneDrive/Documentos/Proyecto_salvacion/{nombre}"
+    send_report = EmailService(receiver_email= "X", attachment= ruta_archivo)
+    send_report.send_report()
